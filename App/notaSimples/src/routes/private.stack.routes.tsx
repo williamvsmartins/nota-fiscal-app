@@ -1,7 +1,7 @@
 import React from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { searchClient } from "../pages/searchClient"; 
+import { SearchClient } from "../pages/SearchClient"; 
 
 const StackRoutes = createNativeStackNavigator();
 
@@ -11,6 +11,6 @@ export const PrivateRoutes = () => (
             headerShown: false
         }}
     >
-        <StackRoutes.Screen name="searchClient" component={searchClient} />
+        <StackRoutes.Screen name="SearchClient" component={SearchClient} />
     </StackRoutes.Navigator>
 )

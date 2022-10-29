@@ -51,12 +51,12 @@ export function Login(){
         try {
            
             console.log(cnpj)
-            /*
+
             await api.post('login', {
                 login: cnpj,
                 senha: password
             });
-            */
+
             await handleAuth({
                 cnpj,
                 password
@@ -65,7 +65,7 @@ export function Login(){
             const login = await AsyncStorage.getItem('@notaSimples:login');
             console.log(login)
 
-            navigator.navigate("searchClient")
+            navigator.navigate("SearchClient")
         } catch(error) {
             console.log(error)
             Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
