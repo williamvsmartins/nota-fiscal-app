@@ -7,11 +7,11 @@ const StackRoutes = createNativeStackNavigator();
 
 export const PublicRoutes = () => (
     <StackRoutes.Navigator
-    screenOptions={{
-      headerShown: false
-    }}
-  >
-    <StackRoutes.Screen name="Login" component={Login} />
+      screenOptions={{
+        headerShown: false
+      }}
+    >
+      <StackRoutes.Screen name="Login" component={Login} />
     
   </StackRoutes.Navigator>
 );

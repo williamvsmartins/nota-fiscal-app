@@ -15,6 +15,7 @@ import {
 
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useNavigation } from "@react-navigation/native";
 
 
 import { Ionicons } from '@expo/vector-icons';
@@ -28,6 +29,8 @@ import colors from "../styles/colors";
 
 export function Login(){
 
+    const navigator = useNavigation()
+
     const { handleAuth } = loginAuth();
 
     const [cnpjFormatted, setCnpjFormatted] = useState('')
@@ -39,7 +42,8 @@ export function Login(){
     const [isFilled, setIsFilled] = useState(false)
 
     async function handleSubmit(){
-        let cnpj = cnpjFormatted.replace(/([^\d])+/gim, ''); //mantém apenas os números
+
+        let cnpj = cnpjFormatted.replace(/([^\d])+/gim, ''); //limpa o cnpj e mantém apenas os números
 
         if(!cnpj && password)
             return Alert.alert("Digite seu CNPJ e senha!")
@@ -47,20 +51,21 @@ export function Login(){
         try {
            
             console.log(cnpj)
+            /*
             await api.post('login', {
                 login: cnpj,
                 senha: password
             });
-
+            */
             await handleAuth({
                 cnpj,
                 password
             });
-
+            //DEBUG
             const login = await AsyncStorage.getItem('@notaSimples:login');
             console.log(login)
 
-            Alert.alert('Logado com sucesso!');
+            navigator.navigate("searchClient")
         } catch(error) {
             console.log(error)
             Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
