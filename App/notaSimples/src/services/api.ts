@@ -1,7 +1,10 @@
 import axios from 'axios';
+import { API_NFC, QUERY_CNPJ } from '@env'
 
-const api = axios.create({
-    baseURL: `http://192.168.1.8:3333/`
+export const apiNFC = axios.create({
+    baseURL: `${API_NFC}`
 });
 
-export default api;
+export const queryCNPJ = axios.create({
+    baseURL: `${QUERY_CNPJ}`
+});

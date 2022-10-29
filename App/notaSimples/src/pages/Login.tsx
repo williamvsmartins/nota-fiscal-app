@@ -23,7 +23,7 @@ import { TextInputMask } from "react-native-masked-text";
 
 import { ButtonConfirmation } from "../components/ButtonConfirmation";
 
-import api from "../services/api";
+import { apiNFC }  from "../services/api";
 import { loginAuth } from '../hooks/loginAuth';
 import colors from "../styles/colors";
 
@@ -52,7 +52,7 @@ export function Login(){
            
             console.log(cnpj)
 
-            await api.post('login', {
+            await apiNFC.post('login', {
                 login: cnpj,
                 senha: password
             });
