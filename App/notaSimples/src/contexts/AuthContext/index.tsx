@@ -29,7 +29,7 @@ export function AuthProvider({ children }: AuthProviderProps) {
         <AuthContext.Provider
           value={{
             login,
-            isAuth: !!login?.cnpj && !login?.password,
+            isAuth: !!login?.cnpj && !!login?.password,
             isLoading,
             handleAuth
           }}
