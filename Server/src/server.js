@@ -1,5 +1,5 @@
 const express = require('express')
-require('dotenv').load();
+require('dotenv')
 const routes = require('./routes')
 
 
