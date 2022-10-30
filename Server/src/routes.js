@@ -6,10 +6,9 @@ const express = require('express');
 const routes = express.Router();
 
 routes.post("/login", async (req, res) => {
-
   const { login, senha} = req.body;
 
-  const browser = await playwright.chromium.launch({ headless: false }); // headless: false
+  const browser = await playwright.chromium.launch(); // headless: false
   const context = await browser.newContext();
   const page = await context.newPage();
 
@@ -48,8 +47,8 @@ routes.post("/login", async (req, res) => {
 
 
 routes.post("/emitirNota", async (req, res) => {
-  const { login, senha, cnpj, email, descricao, quantidade, valor } = req.body;
-  const browser = await playwright.chromium.launch({ headless: false }); // headless: false
+  const { login, senha, email, cnpj, descricao, quantidade, valor } = req.body;
+  const browser = await playwright.chromium.launch(); // headless: false
   const context = await browser.newContext();
   const page = await context.newPage();
 
