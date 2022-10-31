@@ -13,6 +13,10 @@ import {
     TouchableOpacity
 } from "react-native";
 
+import { useForm, Controller } from "react-hook-form";
+import { yupResolver } from '@hookform/resolvers/yup'
+import * as yup from 'yup'
+
 
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
@@ -27,45 +31,48 @@ import { apiNFC }  from "../services/api";
 import { loginAuth } from '../hooks/loginAuth';
 import colors from "../styles/colors";
 
+const schema = yup.object({
+    cnpjFormatted: yup.string().min(18, "CNPJ Incompleto").required("Digite seu CNPJ"),
+    password: yup.string().required("Digite sua senha"),
+    email: yup.string().email("E-mail Inválido").required("Digite seu E-mail para que você possa receber as notas emitidas")
+})
+
 export function Login(){
 
     const navigator = useNavigation()
 
+    const { control, handleSubmit, formState: {errors}}= useForm({
+        resolver: yupResolver(schema)
+    })
+
     const { handleAuth } = loginAuth();
 
-    const [cnpjFormatted, setCnpjFormatted] = useState('')
-    const [password, setPassword] = useState('')
-
     const [hidePass, setHidePass] = useState(true)
-
     const [isFocused, setIsFocused] = useState(false)
     const [isFilled, setIsFilled] = useState(false)
-
-    async function handleSubmit(){
-
-        let cnpj = cnpjFormatted.replace(/([^\d])+/gim, ''); //limpa o cnpj e mantém apenas os números
-
-        if(!cnpj && password)
-            return Alert.alert("Digite seu CNPJ e senha!")
+    
+    async function handleSignIn(data){
+        let cnpj = data.cnpjFormatted.replace(/([^\d])+/gim, '')
+        let password =  data.password
+        let email = data.email
 
         try {
-           
-            console.log(cnpj)
-
-            await apiNFC.post('login', {
-                login: cnpj,
-                senha: password
+           await apiNFC.post('login', {
+                login: data.cnpjFormatted.replace(/([^\d])+/gim, ''),
+                senha: data.password
             });
 
             await handleAuth({
                 cnpj,
-                password
+                password,
+                email
             });
             //DEBUG
-            const login = await AsyncStorage.getItem('@notaSimples:login');
-            console.log(login)
-
-            navigator.navigate("SearchClient")
+            const salvo = await AsyncStorage.getItem('@notaSimples:login');
+           console.log(salvo)
+           Alert.alert('Logado com sucesso');
+           navigator.navigate("SearchClient")
+           
         } catch(error) {
             console.log(error)
             Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
@@ -90,42 +97,84 @@ export function Login(){
                             </View>
 
                             <Text style={styles.label}>CNPJ</Text>
-                            <TextInputMask 
-                                placeholderTextColor="#9a73ef"
-                                placeholder="Insira seu CNPJ"
-                                maxLength={18} //quantidade max de dígitos
-                                style={styles.inputCNPJ}
-                                type="cnpj"
-                                value={cnpjFormatted}
-                                onChangeText={ text => setCnpjFormatted(text)}
+                            <Controller
+                                 control={control}
+                                 name="cnpjFormatted"
+                                 render= {({ field: {onChange, onBlur, value}}) => (
+                                    <TextInputMask 
+                                        placeholderTextColor="#9a73ef"
+                                        placeholder="Insira seu CNPJ"
+                                        maxLength={18} //quantidade max de dígitos
+                                        style={styles.inputCNPJ}
+                                        onBlur={onBlur}
+                                        type="cnpj"
+                                        value={value}
+                                        onChangeText={onChange}
+                                    />
+                                 )}
                             />
+                            {errors.cnpjFormatted && 
+                                <Text style={styles.labelError}>{errors.cnpjFormatted?.message}</Text>
+                                
+                            }
+                             
                             <Text style={styles.label}>Senha</Text>
-                            <View style={styles.inputPassArea}>
-                                <TextInput style={styles.inputPass}
-                                    placeholder="Insira sua senha"
-                                    placeholderTextColor="#9a73ef"
-                                    value={password}
-                                    onChangeText={text => setPassword(text)}
-                                    autoComplete={"off"}
-                                    secureTextEntry={hidePass} //transforma em senha oculta
-                                />
-                                <TouchableOpacity
-                                    activeOpacity={0.8} //tempo da opacidade do click
-                                    style={styles.icon}
-                                    onPress={() => setHidePass(!hidePass)} //Inverte o valor do hidePass
-                                > 
-                                    { hidePass ? //se for verdadeiro
-                                        <Ionicons name="eye"color="#fff" size={25} />
-                                        : //se não
-                                        <Ionicons name="eye-off"color="#fff" size={25} />
-                                    }
-                                </TouchableOpacity>
-                            </View>
+                            <Controller
+                                control={control}
+                                name="password"
+                                render={({ field: {onChange, onBlur, value}}) => (
+                                    <View style={styles.inputPassArea}>
+                                        <TextInput style={styles.inputPass}
+                                            placeholder="Insira sua senha"
+                                            placeholderTextColor="#9a73ef"
+                                            value={value}
+                                            onChangeText={onChange}
+                                            autoComplete={"off"}
+                                            autoCapitalize={"none"}
+                                            secureTextEntry={hidePass} //transforma em senha oculta
+                                        />
+                                        <TouchableOpacity
+                                            activeOpacity={0.8} //tempo da opacidade do click
+                                            style={styles.icon}
+                                            onPress={() => setHidePass(!hidePass)} //Inverte o valor do hidePass
+                                        > 
+                                            { hidePass ? //se for verdadeiro
+                                                <Ionicons name="eye"color="#fff" size={25} />
+                                                : //se não
+                                                <Ionicons name="eye-off"color="#fff" size={25} />
+                                            }
+                                        </TouchableOpacity>
+                                    </View>
+                                )}
+                            />
+                            {errors.password && 
+                                <Text style={styles.labelError}>{errors.password?.message}</Text>
+                                
+                            }
+
+                            <Controller
+                                 control={control}
+                                 name="email"
+                                 render={({ field: {onChange, onBlur, value}}) => (
+                                    <TextInput style={styles.inputCNPJ}
+                                        keyboardType={"email-address"}
+                                        placeholder="Insira seu email"
+                                        placeholderTextColor="#9a73ef"
+                                        value={value}
+                                        onChangeText={onChange}
+                                    />
+                                 )}
+                            />
+                            {errors.email && 
+                                <Text style={styles.labelError}>{errors.email?.message}</Text>
+                                
+                            }
+                            
                             <View style={styles.footer}>
                                 <ButtonConfirmation
                                     title="Confirmar"
-                                    disabled={!cnpjFormatted && !password}
-                                    onPress={handleSubmit}
+                                   // disabled={!cnpjFormatted && !password}
+                                    onPress={handleSubmit(handleSignIn)}
                                 />
                             </View>
                         </View>
@@ -196,5 +245,8 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 40,
         paddingHorizontal: 20
+    },
+    labelError: {
+
     }
 })
