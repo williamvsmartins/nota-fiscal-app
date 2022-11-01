@@ -4,6 +4,7 @@ import { Login } from '../../libs/storage';
 export interface Data {
     cnpj: string
     password: string
+    email: string
 }
 
 export interface AuthContextData {
