@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "npx expo start --dev-client --tunnel",
     "start": "expo start --tunnel",
+    "update": " npx eas update --branch production",
     "android": "expo start --android",
     "ios": "expo start --ios",
     "web": "expo start --web"
