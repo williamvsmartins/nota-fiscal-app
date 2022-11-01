@@ -18,7 +18,14 @@ interface ClientConfirmationProps {
 }
 
 export function ClientConfirmation({data, ...rest} : ClientConfirmationProps) {
+
     const navigator = useNavigation();
+    function handleClient() {
+        navigator.navigate('NoteDetailing', {
+            cnpjClient: data.cnpj,
+            nameClient: data.nome
+        })
+    }
     return (
         <View style={styles.container}>
            <View style={styles.content}>
@@ -29,7 +36,7 @@ export function ClientConfirmation({data, ...rest} : ClientConfirmationProps) {
            </View>
             <ButtonConfirmation 
                 title="Confirmar"
-                onPress={() => navigator.navigate("NoteDetailing")}
+                onPress={handleClient}
             />
                     
         </View>
