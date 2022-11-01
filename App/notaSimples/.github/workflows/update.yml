@@ -3,10 +3,10 @@ on: pull_request
 
 jobs:
   update:
-    name: EAS Update
+    name: EAS Update 
     runs-on: ubuntu-latest
     steps:
-   # https://expo.dev/accounts/williamvalther/settings/access-tokens
+   # https://expo.dev/accounts/settings/access-tokens
       - name: Check for EXPO_TOKEN
         run: |
           if [ -z "${{ secrets.EXPO_TOKEN }}" ]; then
@@ -45,4 +45,4 @@ jobs:
         run: yarn install --immutable
 
       - name: Publish update
-        run: eas update --auto
+        run: eas update --branch production --auto
