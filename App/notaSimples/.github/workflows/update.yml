@@ -3,7 +3,7 @@ on: pull_request
 
 jobs:
   update:
-    name: EAS Update
+    name: EAS Update 
     runs-on: ubuntu-latest
     steps:
    # https://expo.dev/accounts/williamvalther/settings/access-tokens
