@@ -1,4 +1,4 @@
-import React from "react";
+import React, { Component } from "react";
 import { 
     TouchableOpacity,
     Text,
@@ -9,7 +9,7 @@ import {
 import colors from "../styles/colors";
 
 interface ButtonConfirmationProps extends TouchableOpacityProps {
-    title: string;
+    title: any;
 }
 
 export function ButtonConfirmation({ title, ...rest} : ButtonConfirmationProps) {
@@ -18,9 +18,7 @@ export function ButtonConfirmation({ title, ...rest} : ButtonConfirmationProps) 
             style={styles.container}
             {...rest}
         >
-            <Text style={styles.text}>
-                { title }
-            </Text>
+            {title}
         </TouchableOpacity>
     )
 }
@@ -32,9 +30,5 @@ const styles = StyleSheet.create({
         borderRadius: 16,
         justifyContent: 'center',
         alignItems: 'center'
-    },
-    text:{
-        fontSize: 16,
-        color: colors.white,
     }
 });
