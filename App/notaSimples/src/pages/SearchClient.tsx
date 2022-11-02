@@ -9,10 +9,11 @@ import {
     View, 
     Text,
     StyleSheet,
-    TextInput,
-    TouchableOpacity
+    ActivityIndicator 
 } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+
+import colors from "../styles/colors";
 
 import { TextInputMask } from "react-native-masked-text";
 import { Modalize } from "react-native-modalize";
@@ -28,34 +29,35 @@ interface ClientProps {
 }
 
 export function SearchClient(){
-
     const modalizeRef = useRef<Modalize>(null);
 
+    const [loading, setLoading] = useState(false)
     const [cnpjFormatted, setCnpjFormatted] = useState('')
     const [clientData, setClientData] = useState<ClientProps>({
         nome: "", 
         cnpj: ""
     })
 
-    console.log(clientData)
-
     async function fetchClient(){
+        setLoading(true)
         Keyboard.dismiss() //fecha o teclado
 
         let cnpj = cnpjFormatted.replace(/([^\d])+/gim, ''); //limpa o cnpj e mantém apenas os números
 
-        if(!cnpj)
-            return Alert.alert("Digite o CNPJ")
-
         try {
-           const { data } = await queryCNPJ.get(`${cnpj}`)
-           setClientData(data)
-
-           modalizeRef.current?.open(); //abre modal
-
+            const { data } = await queryCNPJ.get(`${cnpj}`)
+            if(data.status !=  "ERROR"){
+                setClientData(data)
+                setLoading(false)
+                modalizeRef.current?.open(); //abre modal
+            } else if (data.status ==  "ERROR") {
+                Alert.alert(data.message);
+                setLoading(false)
+            }
         } catch(error) {
+            setLoading(false)
             console.log(error)
-            Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
+            Alert.alert("Excedeu o limite de buscas");
         }
     }
     return(
@@ -85,7 +87,17 @@ export function SearchClient(){
                                 />
                                 <View style={styles.footer}>
                                     <ButtonConfirmation
-                                        title="Confirmar"
+                                        title={ loading ? (
+                                            <ActivityIndicator animating={loading} size="large" color={colors.white} />
+                                            ) : (
+                                                <Text 
+                                                    style={{ 
+                                                        fontSize: 16, color: colors.white
+                                                    }}
+                                                >
+                                                        Confirmar
+                                                </Text>
+                                            )}
                                         disabled={!cnpjFormatted}
                                         onPress={fetchClient}
                                     />
@@ -127,15 +139,16 @@ const styles = StyleSheet.create({
 
     },
     inputCNPJ: {
-        width: '100%',
-        backgroundColor: '#121212',
+        borderBottomWidth: 2,
+        borderColor: colors.gray,
         borderRadius: 5,
-        height: 50,
+        width: '100%',
         alignItems: 'center',
-        color: '#fff',
+        color: colors.purple,
         padding: 8,
         fontSize: 18,
-        marginBottom: 30
+        marginBottom: 30,
+        textAlign: 'center'
     },
     footer: {
 

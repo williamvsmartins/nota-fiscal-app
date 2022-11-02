@@ -40,7 +40,15 @@ export function NoteDetailingConfirmation({data, ...rest} : NoteDetailingConfirm
            </View>
 
             <ButtonConfirmation 
-                title="Confirmar"
+                title={
+                    <Text 
+                        style={{ 
+                            fontSize: 16, color: colors.white
+                        }}
+                    >
+                            Confirmar
+                    </Text>
+                }
             />
                     
         </View>

@@ -208,7 +208,15 @@ export function NoteDetailing(){
                                 </Text>
                                 <View style={styles.footer}>
                                     <ButtonConfirmation
-                                        title="Confirmar"
+                                        title={
+                                            <Text 
+                                                style={{ 
+                                                    fontSize: 16, color: colors.white
+                                                }}
+                                            >
+                                                    Confirmar
+                                            </Text>
+                                        }
                                         onPress={handleSubmit(sendToConfirm)}
                                     />
                                 </View>

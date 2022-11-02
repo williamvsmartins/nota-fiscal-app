@@ -35,7 +35,15 @@ export function ClientConfirmation({data, ...rest} : ClientConfirmationProps) {
                 </View>
            </View>
             <ButtonConfirmation 
-                title="Confirmar"
+                title={
+                    <Text 
+                        style={{ 
+                            fontSize: 16, color: colors.white
+                        }}
+                    >
+                            Confirmar
+                    </Text>
+                }
                 onPress={handleClient}
             />
                     
