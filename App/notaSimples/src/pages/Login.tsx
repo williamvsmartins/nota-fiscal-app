@@ -10,7 +10,8 @@ import {
     Text,
     StyleSheet,
     TextInput,
-    TouchableOpacity
+    TouchableOpacity,
+    ActivityIndicator 
 } from "react-native";
 
 import { useForm, Controller } from "react-hook-form";
@@ -32,7 +33,7 @@ import { loginAuth } from '../hooks/loginAuth';
 import colors from "../styles/colors";
 
 const schema = yup.object({
-    cnpjFormatted: yup.string().min(18, "CNPJ Incompleto").required("Digite seu CNPJ"),
+    cnpjFormatted: yup.string().min(18, "CNPJ inválido").required("Digite seu CNPJ"),
     password: yup.string().required("Digite sua senha"),
     email: yup.string().email("E-mail Inválido").required("Digite seu E-mail para que você possa receber as notas emitidas")
 })
@@ -48,10 +49,24 @@ export function Login(){
     const { handleAuth } = loginAuth();
 
     const [hidePass, setHidePass] = useState(true)
+    const [loading, setLoading] = useState(false)
+    const [Locked, setLocked] = useState(false)
+
     const [isFocused, setIsFocused] = useState(false)
     const [isFilled, setIsFilled] = useState(false)
+
+    function handleIsLocked(){
+        setLocked(true)
+        setTimeout(() => {
+            setLocked(false);
+        }, 180000);
+
+    };
+    
     
     async function handleSignIn(data){
+        Keyboard.dismiss()
+        setLoading(true)
         let cnpj = data.cnpjFormatted.replace(/([^\d])+/gim, '')
         let password =  data.password
         let email = data.email
@@ -70,10 +85,13 @@ export function Login(){
             //DEBUG
             const salvo = await AsyncStorage.getItem('@notaSimples:login');
            console.log(salvo)
+           setLoading(false)
            Alert.alert('Logado com sucesso');
            navigator.navigate("SearchClient")
-           
+
         } catch(error) {
+            handleIsLocked()
+            setLoading(false)
             console.log(error)
             Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
         }
@@ -160,6 +178,7 @@ export function Login(){
                                         keyboardType={"email-address"}
                                         placeholder="Insira seu email"
                                         placeholderTextColor="#9a73ef"
+                                        autoCapitalize={"none"}
                                         value={value}
                                         onChangeText={onChange}
                                     />
@@ -169,11 +188,28 @@ export function Login(){
                                 <Text style={styles.labelError}>{errors.email?.message}</Text>
                                 
                             }
+
+                            {Locked ? (
+                                <Text>Trancado</Text>
+                            ): (
+                                <Text>oii </Text>
+                            )}
+
                             
                             <View style={styles.footer}>
                                 <ButtonConfirmation
-                                    title="Confirmar"
-                                   // disabled={!cnpjFormatted && !password}
+                                    title={ loading ? (
+                                        <ActivityIndicator animating={loading} size="large" color={colors.white} />
+                                        ) : (
+                                            <Text 
+                                                style={{ 
+                                                    fontSize: 16, color: colors.white
+                                                }}
+                                            >
+                                                    Confirmar
+                                            </Text>
+                                        )}
+                                    disabled={loading || Locked}
                                     onPress={handleSubmit(handleSignIn)}
                                 />
                             </View>
