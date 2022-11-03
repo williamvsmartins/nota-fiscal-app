@@ -25,6 +25,7 @@ export function ButtonConfirmation({ title, ...rest} : ButtonConfirmationProps) 
 
 const styles = StyleSheet.create({
     container : {
+        width: '100%',
         backgroundColor: colors.purple,
         height: 56,
         borderRadius: 16,
