@@ -47,13 +47,13 @@ interface DetailingProps {
 }
 
 const schema = yup.object({
-    description: yup.string().required("Digite uma descrição para seu produto/serviço."),
+    description: yup.string().required("Digite uma descrição para seu produto."),
     unitaryValue: yup.string().test(
         'is-42',
         "Digite algum valor",
         (value) => value != "R$0,00",
-      ).required("Digite o valor unitário do seu produto/serviço"),
-    quantity: yup.number().min(0, "Insira a quantidade do seu produto/serviço").required("Insira a quantidade do seu produto/serviço")
+      ).required("Digite o valor unitário do seu produto"),
+    quantity: yup.number().min(1, "Insira a quantidade do seu produto").required("Insira a quantidade do seu produto")
 })
 
 export function NoteDetailing(){
@@ -70,10 +70,6 @@ export function NoteDetailing(){
         cnpjClient,
         nameClient
     } = route.params as RouteParams;
-
-    const [description, setDescription] = useState('') //final
-    const [quantity, setQuantity] = useState(0) 
-    const [unitValue, setUnitValue] = useState('0,00') //finall
 
     const [ total, setTotal] = useState(0)
 
@@ -95,34 +91,13 @@ export function NoteDetailing(){
         console.log(data)
         Keyboard.dismiss()
 
-        /*
-        const dataFormatted = {
-            cnpj: cnpjClient.replace(/([^\d])+/gim, ''),
-            nome: nameClient,
-            descricao: description,
-            quantidade: String(quantity),
-            valor: unitValue
-        }*/
-        try {
-            setDetailingData(data)
+        setDetailingData(data)
 
-            modalizeRef.current?.open();
-           
-            
-            /*
-            await apiNFC.post('login', {
-                login: 'fake',
-                senha: "fake",
-                cnpj: "williamvaltherprogramador@gmail.com, williamvsmartins@gmail.com",
-                descricao: description,
-                quantidade: String(quantity),
-                valor: unitValue
-            });
-            */
-        } catch(error) {
-            console.log(error)
-            Alert.alert('Não foi possível acessar sua conta. Verifique seus dados e tente novamente em 3 minutos!');
-        }
+        modalizeRef.current?.open();              
+    }
+
+    function handleSend() {
+       
     }
     
     return(
@@ -137,29 +112,34 @@ export function NoteDetailing(){
                         <View style={styles.content}>
                             <View style={styles.form}>
                                 <View style={styles.header}>
-                                    <Text>
-                                        Serviço
-                                    </Text>
-                                    <Text>
-                                        {cnpjClient},
-                                        {nameClient}
+                                    <Text style={styles.title}>
+                                        Detalhes  do Serviço
                                     </Text>
                                 </View>
-                                <Text style={styles.label}>CNPJ</Text>
+                                <View style={styles.identification}>
+                                    <Text style={styles.cnpj}> {cnpjClient}</Text>
+                                    <Text style={styles.nome}> {nameClient}</Text>
+                                </View>
+                                {errors.description && 
+                                <Text style={styles.labelError}>{errors.description?.message}</Text>
+                                }
                                 <Controller
                                     control={control}
                                     name="description"
                                     render= {({ field: {onChange, onBlur, value}}) => (
                                         <TextInput
-                                        placeholderTextColor="#9a73ef"
+                                        placeholderTextColor={colors.purple}
                                         placeholder="Descrição do produto"
-                                        style={styles.inputCNPJ}
+                                        style={[styles.input, {
+                                            borderWidth: errors.description && 2,
+                                            borderColor: errors.description && colors.red
+                                        }]}
                                         value={value}
                                         onChangeText={onChange}
                                         />
                                     )}
                                 />
-
+                                <Text style={styles.label}>Valor Unitário</Text>
                                 <Controller
                                     control={control}
                                     name="unitaryValue"
@@ -168,44 +148,41 @@ export function NoteDetailing(){
                                             type='money'
                                             placeholderTextColor="#9a73ef"
                                             maxLength={11} //quantidade max de dígitos
-                                            style={styles.inputCNPJ}
+                                            style={[styles.input, {
+                                                borderWidth: errors.unitaryValue && 2,
+                                                borderColor: errors.unitaryValue && colors.red
+                                            }]}
                                             value={String(value)}
                                             onChangeText={onChange}
                                         />
                                     )}
                                 />
-                                 {errors.unitaryValue && 
-                                <Text style={styles.labelError}>{errors.unitaryValue?.message}</Text>
-                                
-                                }
-                               
-                               <Controller
-                                    control={control}
-                                    name="quantity"
-                                    render= {({ field: {onChange, onBlur, value}}) => (
-                                        <NumericInput 
-                                            value={value} 
-                                            onChange={onChange} 
-                                            minValue={0}
-                                            totalWidth={240} 
-                                            totalHeight={50} 
-                                            iconSize={25}
-                                            step={1.5}
-                                            valueType='integer'
-                                            rounded 
-                                            textColor='#B0228C' 
-                                            rightButtonBackgroundColor='#EA3788' 
-                                            leftButtonBackgroundColor='#E56B70'
-                                        />
-                                    )}
+                                 
+                                <Text style={styles.label}>Quantidade</Text>
+                                <Controller
+                                        control={control}
+                                        name="quantity"
+                                        render= {({ field: {onChange, onBlur, value}}) => (
+                                            <NumericInput 
+                                                value={value} 
+                                                onChange={onChange} 
+                                                minValue={0}
+                                                totalWidth={285} 
+                                                totalHeight={50} 
+                                                step={1.5}
+                                                valueType='integer'
+                                                rounded 
+                                                iconSize={25}
+                                                textColor={colors.purple}
+                                                rightButtonBackgroundColor={colors.purple}
+                                                leftButtonBackgroundColor={colors.red}
+                                            />
+                                        )}
                                 />
-                                
-                                
-                                
-
-                                <Text style={styles.label}>
-                                    Total: R${total}
-                                </Text>
+                                {errors.quantity && 
+                                <Text style={styles.labelError}>{errors.quantity?.message}</Text>
+                                }
+                                                                                                            
                                 <View style={styles.footer}>
                                     <ButtonConfirmation
                                         title={
@@ -256,22 +233,52 @@ const styles = StyleSheet.create({
         paddingHorizontal: 54,
     },
     header: {
+        alignItems: 'center'    
+    },
+    title:{
+        fontSize: 30,
+        color: colors.purple,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        paddingBottom: 30
+    },
+    identification: {
         alignItems: 'center',
-        marginBottom: 50
+        marginHorizontal: 20,
+        marginBottom: 40
+    },
+    cnpj: {
+        fontSize: 18,
+        fontWeight: "bold",
+        textAlign: 'center',
+        color: colors.gray_dark,
+        marginTop: 10
+    },
+    nome: {
+        fontSize: 20,
+        fontWeight: "bold",
+        textAlign: 'center',
+        color: colors.purple,
     },
     label:{
-        marginBottom: 5
+        fontSize: 15,
+        color: colors.purple,
+        paddingVertical: 7
     },
-    inputCNPJ: {
+    input: {
         width: '100%',
-        backgroundColor: '#121212',
-        borderRadius: 5,
-        height: 50,
+        flexDirection: 'row',
+        borderRadius: 10,
+        backgroundColor: colors.gray,
         alignItems: 'center',
-        color: '#fff',
-        padding: 8,
+        height: 60,
+        paddingHorizontal: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
+        marginBottom: 40,
         fontSize: 18,
-        marginBottom: 30
+        fontWeight: "bold",
+        color: colors.purple
     },
     inputPassArea: {
         flexDirection: 'row',
@@ -298,5 +305,9 @@ const styles = StyleSheet.create({
         width: '100%',
         marginTop: 40,
         paddingHorizontal: 20
-    }
+    },
+    labelError: {
+        color: colors.red,
+        marginLeft: 2
+    },
 })
