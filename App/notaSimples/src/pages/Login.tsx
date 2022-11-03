@@ -18,7 +18,7 @@ import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup'
 import * as yup from 'yup'
 
-
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useNavigation } from "@react-navigation/native";
 
@@ -86,7 +86,6 @@ export function Login(){
             const salvo = await AsyncStorage.getItem('@notaSimples:login');
            console.log(salvo)
            setLoading(false)
-           Alert.alert('Logado com sucesso');
            navigator.navigate("SearchClient")
 
         } catch(error) {
@@ -107,24 +106,33 @@ export function Login(){
                     onPress={Keyboard.dismiss}
                 >
                     <View style={styles.content}>
+                            
                         <View style={styles.form}>
                             <View style={styles.header}>
-                                <Text>
+                                <Text style={styles.title}>
                                     Login
                                 </Text>
                             </View>
-
+                            {Locked &&
+                                <View style={styles.locked}>
+                                    <Text style={styles.lockedText}>Erro! Por favor, aguarde!</Text>
+                                </View>
+                            }
                             <Text style={styles.label}>CNPJ</Text>
                             <Controller
                                  control={control}
                                  name="cnpjFormatted"
                                  render= {({ field: {onChange, onBlur, value}}) => (
-                                    <TextInputMask 
-                                        placeholderTextColor="#9a73ef"
+                                     <TextInputMask 
+                                        style={[
+                                            styles.inputCNPJ,{
+                                            borderWidth: errors.cnpjFormatted && 2,
+                                            borderColor: errors.cnpjFormatted && colors.red
+                                        }]}
+                                        placeholderTextColor={colors.purple}
                                         placeholder="Insira seu CNPJ"
                                         maxLength={18} //quantidade max de dígitos
-                                        style={styles.inputCNPJ}
-                                        onBlur={onBlur}
+                                        returnKeyType="next"
                                         type="cnpj"
                                         value={value}
                                         onChangeText={onChange}
@@ -141,25 +149,30 @@ export function Login(){
                                 control={control}
                                 name="password"
                                 render={({ field: {onChange, onBlur, value}}) => (
-                                    <View style={styles.inputPassArea}>
+                                    <View style={[
+                                                styles.inputPassArea, {
+                                                borderWidth: errors.cnpjFormatted && 2,
+                                                borderColor: errors.cnpjFormatted && colors.red
+                                            }]}>
                                         <TextInput style={styles.inputPass}
                                             placeholder="Insira sua senha"
-                                            placeholderTextColor="#9a73ef"
+                                            placeholderTextColor={colors.purple}
                                             value={value}
                                             onChangeText={onChange}
                                             autoComplete={"off"}
                                             autoCapitalize={"none"}
                                             secureTextEntry={hidePass} //transforma em senha oculta
+                                            returnKeyType="next"
                                         />
                                         <TouchableOpacity
-                                            activeOpacity={0.8} //tempo da opacidade do click
+                                            activeOpacity={1} //tempo da opacidade do click
                                             style={styles.icon}
                                             onPress={() => setHidePass(!hidePass)} //Inverte o valor do hidePass
                                         > 
                                             { hidePass ? //se for verdadeiro
-                                                <Ionicons name="eye"color="#fff" size={25} />
+                                                <Ionicons name="eye"color={colors.purple} size={25} />
                                                 : //se não
-                                                <Ionicons name="eye-off"color="#fff" size={25} />
+                                                <Ionicons name="eye-off"color={colors.purple} size={25} />
                                             }
                                         </TouchableOpacity>
                                     </View>
@@ -169,18 +182,23 @@ export function Login(){
                                 <Text style={styles.labelError}>{errors.password?.message}</Text>
                                 
                             }
-
+                            <Text style={styles.label}>E-mail</Text>
                             <Controller
                                  control={control}
                                  name="email"
                                  render={({ field: {onChange, onBlur, value}}) => (
-                                    <TextInput style={styles.inputCNPJ}
+                                    <TextInput style={[
+                                            styles.inputCNPJ, {
+                                            borderWidth: errors.cnpjFormatted && 2,
+                                            borderColor: errors.cnpjFormatted && colors.red
+                                        }]}
                                         keyboardType={"email-address"}
                                         placeholder="Insira seu email"
-                                        placeholderTextColor="#9a73ef"
+                                        placeholderTextColor={colors.purple}
                                         autoCapitalize={"none"}
                                         value={value}
                                         onChangeText={onChange}
+                                        returnKeyType="go"
                                     />
                                  )}
                             />
@@ -189,17 +207,12 @@ export function Login(){
                                 
                             }
 
-                            {Locked ? (
-                                <Text>Trancado</Text>
-                            ): (
-                                <Text>oii </Text>
-                            )}
 
                             
                             <View style={styles.footer}>
                                 <ButtonConfirmation
-                                    title={ loading ? (
-                                        <ActivityIndicator animating={loading} size="large" color={colors.white} />
+                                    title={ loading || Locked ? (
+                                        <ActivityIndicator animating={loading || Locked} size="large" color={colors.white} />
                                         ) : (
                                             <Text 
                                                 style={{ 
@@ -226,54 +239,72 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         alignItems: 'center',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        backgroundColor: colors.white,
     },
     content:{
         flex: 1,
-        width: '100%'
-
+        width: '100%',
+    },
+    header: {
+        alignItems: 'center'    
+    },
+    title:{
+        fontSize: 30,
+        color: colors.purple,
+        fontWeight: 'bold',
+        textAlign: 'center',
+        paddingBottom: 70
     },
     form: {
         flex: 1,
         justifyContent: 'center',
-        paddingHorizontal: 54,
+        paddingHorizontal: 50,
+
     },
-    header: {
-        alignItems: 'center',
-        marginBottom: 50
-    },
+    
     label:{
-        marginBottom: 5
+        fontSize: 15,
+        color: colors.purple,
+        paddingVertical: 7
     },
     inputCNPJ: {
         width: '100%',
-        backgroundColor: '#121212',
-        borderRadius: 5,
-        height: 50,
+        flexDirection: 'row',
+        borderRadius: 10,
+        backgroundColor: colors.gray,
         alignItems: 'center',
-        color: '#fff',
-        padding: 8,
+        height: 60,
+        paddingLeft: 20,
+        paddingTop: 10,
+        paddingBottom: 10,
         fontSize: 18,
-        marginBottom: 30
+        fontWeight: "bold",
+        color: colors.purple
     },
     inputPassArea: {
-        flexDirection: 'row',
         width: '100%',
-        backgroundColor: '#121212',
-        borderRadius: 5,
-        height: 50,
+        flexDirection: 'row',
+        borderRadius: 10,
+        backgroundColor: colors.gray,
         alignItems: 'center'
     },
     inputPass: {
-        width: '83%', //não passa desse tamanho
-        height: 50,
-        color: '#fff',
-        padding: 8,
-        fontSize: 18
+        width: '80%',
+        height: 60,
+        paddingLeft: 20,
+        borderRadius: 10,
+        paddingTop: 10,
+        paddingBottom: 10,
+        fontSize: 18,
+        fontWeight: "bold",
+        color: colors.purple
     },
     icon: {
-        width: '15%',
-        height: 50,
+        width: '10%',
+        marginLeft: 15,
+        borderRadius: 10,
+        height: 60,
         justifyContent: 'center',
         alignItems: 'center'
     },
@@ -283,6 +314,21 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20
     },
     labelError: {
-
+        color: colors.red
+    },
+    locked: {
+        marginTop: 20,
+        width: '100%',
+        height: 65,
+        backgroundColor: colors.red,
+        borderRadius: 10,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    lockedText: {
+        marginBottom: 10,
+        fontSize: 20,
+        fontWeight: "bold",
+        color: colors.white,
     }
 })
