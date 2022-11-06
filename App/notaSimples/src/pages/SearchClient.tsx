@@ -8,6 +8,7 @@ import {
     Alert,
     View, 
     Text,
+    Modal,
     StyleSheet,
     ActivityIndicator, 
     TouchableOpacity
@@ -86,6 +87,7 @@ export function SearchClient(){
     }
 
     function handleClient() {
+        modalizeRef.current?.close();
         navigator.navigate('NoteDetailing', {
             cnpjClient: clientData.cnpj,
             nameClient: clientData.nome

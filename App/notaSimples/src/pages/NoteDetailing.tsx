@@ -5,15 +5,21 @@ import {
     TouchableWithoutFeedback, //toque na tela executa uma ação
     Platform,
     Keyboard,
-    Alert,
+    TouchableOpacity,
     View, 
     Text,
     StyleSheet,
     TextInput,
+    Alert,
 } from "react-native";
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import { getStatusBarHeight } from 'react-native-iphone-x-helper'
 import { useNavigation, useRoute } from "@react-navigation/native";
 import { Modalize } from "react-native-modalize";
+
+import { Load } from '../components/Load'
+
+import { getLoginStorage } from "../libs/storage";
 
 import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from '@hookform/resolvers/yup'
@@ -33,17 +39,18 @@ import { ButtonConfirmation } from "../components/ButtonConfirmation";
 import { apiNFC }  from "../services/api";
 
 import colors from "../styles/colors";
+
 interface RouteParams {
     cnpjClient: string;
     nameClient: string
 }
 
 interface DetailingProps {
-    cnpj: string,
-    nome: string,
-    descricao: string,
-    quantidade: string,
-    valor: string
+    cnpjClient: string,
+    description: string,
+    nameClient: string,
+    quantity: Number,
+    unitaryValue: string
 }
 
 const schema = yup.object({
@@ -56,8 +63,12 @@ const schema = yup.object({
     quantity: yup.number().min(1, "Insira a quantidade do seu produto").required("Insira a quantidade do seu produto")
 })
 
-export function NoteDetailing(){
+export function NoteDetailing() {
     const modalizeRef = useRef<Modalize>(null);
+
+    function goBack() {
+        modalizeRef.current?.close();
+    }
 
     const route = useRoute();
     const navigator = useNavigation()
@@ -71,15 +82,17 @@ export function NoteDetailing(){
         nameClient
     } = route.params as RouteParams;
 
-    const [ total, setTotal] = useState(0)
-
     const [detailingData, setDetailingData] = useState<DetailingProps>({
-        cnpj: "",
-        nome: "",
-        descricao: "",
-        quantidade: "",
-        valor: ""
+        cnpjClient: "",
+        description: "",
+        nameClient: "",
+        quantity: 0,
+        unitaryValue: ""
     })
+
+    const [loading, setLoading] = useState(false)
+
+
 
     const [hidePass, setHidePass] = useState(true)
 
@@ -88,21 +101,48 @@ export function NoteDetailing(){
 
 
     async function sendToConfirm(data){
-        console.log(data)
         Keyboard.dismiss()
 
-        setDetailingData(data)
+        setDetailingData(Object.assign(data, {cnpjClient, nameClient}))
 
         modalizeRef.current?.open();              
     }
 
-    function handleSend() {
-       
+    async function handleSend() {
+        setLoading(true)
+        const userData = await getLoginStorage();
+
+        
+        
+       try {
+            var cnpjFormatted = detailingData.cnpjClient.replace(/([^\d])+/gim, '')
+            var quantity = String(detailingData.quantity)
+            var value = detailingData.unitaryValue.replace("R$", "")
+        
+            await apiNFC.post('emitirNota', {
+                login: userData.cnpj,
+                senha: userData.password,
+                cnpj: cnpjFormatted,
+                email: userData.email,
+                descricao: detailingData.description,
+                quantidade: quantity,
+                valor: value
+            });
+            setLoading(false)
+            Alert.alert(`Nota fiscal enviada para ${userData.email}`)
+            navigator.navigate("SearchClient")
+       } catch(e){
+         setLoading(false)
+         Alert.alert('Erro')
+       }
     }
+
+    if(loading)
+        return <Load />
     
     return(
-        <SafeAreaView style={styles.container}>
-            <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
+        <SafeAreaView  style={styles.container}>
+            <TouchableWithoutFeedback onPress={Keyboard.dismiss} style={styles.container}>
                 <GestureHandlerRootView style={styles.container}>
                     <KeyboardAvoidingView
                         style={styles.container}
@@ -207,7 +247,31 @@ export function NoteDetailing(){
                         <NoteDetailingConfirmation
                             data={detailingData}
                         />
-                        
+
+                        <View style={styles.footer}>
+                            <TouchableOpacity
+                                onPress={goBack}
+                                style={styles.backButton}
+                            > 
+                                <Ionicons name="md-close" size={30} color={colors.white} />
+                            </TouchableOpacity>
+                            <View style={styles.buttonConfirmation}>
+                                <ButtonConfirmation 
+                                    title={
+                                        <Text 
+                                            style={{ 
+                                                fontSize: 16,
+                                                color: colors.white,
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            Confirmar
+                                        </Text>
+                                    }
+                                    onPress={handleSend}
+                                />
+                            </View>
+                        </View>
                     </Modalize>
                 </GestureHandlerRootView>
             </TouchableWithoutFeedback>
@@ -220,15 +284,16 @@ const styles = StyleSheet.create({
         flex: 1,
         width: '100%',
         alignItems: 'center',
-        justifyContent: 'space-around'
+        justifyContent: 'space-around',
+        marginTop: getStatusBarHeight()
     },
     content:{
         flex: 1,
-        width: '100%'
-
+        width: '100%',
     },
     form: {
         flex: 1,
+        marginBottom: 100,
         justifyContent: 'center',
         paddingHorizontal: 54,
     },
@@ -275,7 +340,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 20,
         paddingTop: 10,
         paddingBottom: 10,
-        marginBottom: 40,
+        marginBottom: 20,
         fontSize: 18,
         fontWeight: "bold",
         color: colors.purple
@@ -302,9 +367,25 @@ const styles = StyleSheet.create({
         alignItems: 'center'
     },
     footer: {
+        flex: 1,
+        flexDirection: 'row',
         width: '100%',
-        marginTop: 40,
+        marginTop: 210,
         paddingHorizontal: 20
+    },
+    backButton:{
+        width: '20%',
+        backgroundColor: colors.red,
+        marginLeft: 15,
+        borderRadius: 10,
+        height: 56,
+        justifyContent: 'center',
+        alignItems: 'center'
+    },
+    buttonConfirmation: {
+       width: '70%',
+       alignItems:'flex-end',
+       marginLeft: 10
     },
     labelError: {
         color: colors.red,

@@ -112,10 +112,11 @@ export function ClientConfirmation({data, ...rest} : ClientConfirmationProps) {
                             Capital social
                         </Text>
                         <Text style={{color:"#5dd55d", 
-                            fontWeight: 'bold'
+                            fontWeight: 'bold',
+                            height: 30
                             }}
                         >
-                            R$ {data.capital_social}
+                            R${data.capital_social}
                         </Text>
                     </View>
                 </View>
@@ -123,12 +124,11 @@ export function ClientConfirmation({data, ...rest} : ClientConfirmationProps) {
                 <View style={styles.overview}>
                     <Text style={styles.overviewTitle}>Visão Geral</Text>
                     <Text style={styles.overviewSubTitle}>
-                        Empresa de {data.municipio}, {data.uf}, {'\n'}
-                        fundada em {data.abertura}. {'\n'}
+                        Empresa de {data.municipio}, {data.uf}, fundada em {data.abertura}.
                         Sua atividade principal é 
                         <Text style={{color: colors.purple, marginRight: 5}}> {data.atividade_principal[0].text}</Text>
                     </Text>
-                    <Text style={styles.situationTitle}>
+                    <Text style={styles.situationLabel}>
                         Situação
                     </Text>
                     <View style={styles.situation}>
@@ -146,9 +146,11 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         width: '100%',
+       
     },
     content: {
         width: '100%',
+        
     },
     identification: {
         alignItems: 'center',
@@ -200,7 +202,7 @@ const styles = StyleSheet.create({
     },
     overview: {
         width: '100%',
-        marginHorizontal: 13,
+        marginHorizontal: 20,
         paddingRight: 10,
     },
     overviewTitle: {
@@ -210,6 +212,7 @@ const styles = StyleSheet.create({
     },
     overviewSubTitle: {
         flex: 1,
+        width: '90%',
         lineHeight: 28,
         fontSize: 18,
         fontWeight: "bold",
@@ -217,14 +220,14 @@ const styles = StyleSheet.create({
         height: 190
     },
     situation: {
-        width: '95%',
+        width: '93%',
         height: 65,
         backgroundColor: '#5dd58357',
         borderRadius: 10,
         alignItems: 'center',
         justifyContent: 'center',
     },
-    situationTitle: {
+    situationLabel: {
         marginTop: 20,
         marginBottom: 10,
         fontSize: 20,
