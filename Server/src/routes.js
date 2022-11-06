@@ -37,8 +37,10 @@ routes.post("/login", async (req, res) => {
 
     await browser.close();
     //retorna OK
+    console.log('Login efetuado!')
     return res.status(201).send();
   } catch(err){
+    console.log('Erro ao logar!')
     await browser.close();
     return res.status(500).send("CNPJ ou senha inválidos! Aguarde 3 minutos e tente novamente")
   }
@@ -148,8 +150,10 @@ routes.post("/emitirNota", async (req, res) => {
       break;
     }
     //retorna OK
+    console.log(`Nota emitida para ${cnpj}`)
     return res.status(201).send();
   } catch(err){
+    console.log('Erro ao emitir nota')
     await browser.close();
     return res.status(500).send("Erro no sistema! Aguarde 3 minutos e tente novamente")
   }
