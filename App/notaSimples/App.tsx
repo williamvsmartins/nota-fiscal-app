@@ -20,9 +20,9 @@ export default function App() {
     updateApp();
   }, []);
 
-  useEffect(() => {
-   AsyncStorage.clear()
-  }, [])
+ // useEffect(() => {
+ //  AsyncStorage.clear()
+ // }, [])
   return (
     <View style={{ flex: 1}}>
       <AuthProvider>
